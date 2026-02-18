@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dijital Okuryazarlık — MEB Projesi</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#07090f;--panel:#0d1520;
+  --cyan:#00e5ff;--red:#ff4b6e;--gold:#ffd166;--green:#06d6a0;--purple:#b388ff;--orange:#ff8c42;
+  --text:#ddeef5;--muted:#4a6070;--border:rgba(255,255,255,.07);
+  --fh:Georgia,'Times New Roman',serif;
+  --fm:'Courier New',monospace;
+  --fb:'Segoe UI',system-ui,Arial,sans-serif;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--fb)}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,229,255,.03) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,229,255,.03) 1px,transparent 1px);
+  background-size:clamp(28px,4.5vw,50px) clamp(28px,4.5vw,50px)}
+
+/* CORNERS */
+.corner{position:fixed;width:clamp(16px,2.2vw,28px);height:clamp(16px,2.2vw,28px);z-index:300;pointer-events:none}
+.corner::before,.corner::after{content:'';position:absolute;background:rgba(0,229,255,.35)}
+.corner::before{width:100%;height:2px;top:0;left:0}.corner::after{width:2px;height:100%;top:0;left:0}
+.tl{top:10px;left:10px}.tr{top:10px;right:10px;transform:scaleX(-1)}
+.bl{bottom:10px;left:10px;transform:scaleY(-1)}.br{bottom:10px;right:10px;transform:scale(-1)}
+@media(max-width:480px){.corner{display:none}}
+
+/* TOPBAR */
+#topbar{position:fixed;top:0;left:0;right:0;height:clamp(44px,6vh,54px);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:0 clamp(12px,2.5vw,50px);z-index:200;
+  background:linear-gradient(180deg,rgba(7,9,15,.97) 0%,transparent 100%)}
+.logo{display:flex;align-items:center;gap:8px;font-family:var(--fm);font-size:clamp(9px,1.1vw,11px);
+  letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+.logo span{display:none}@media(min-width:480px){.logo span{display:inline}}
+.logo-dot{width:7px;height:7px;flex-shrink:0;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}
+#topbar-right{display:flex;align-items:center;gap:clamp(5px,1vw,12px);flex-shrink:0}
+#clock{font-family:var(--fm);font-size:clamp(11px,1.3vw,13px);color:var(--muted);letter-spacing:2px}
+
+/* PROMINENT GAME BUTTON */
+#game-button-wrapper{
+  position:fixed;top:clamp(54px,7vh,64px);left:50%;transform:translateX(-50%);
+  z-index:250;width:100%;max-width:500px;padding:0 clamp(12px,2.5vw,24px);
+  pointer-events:none}
+#game-btn{
+  width:100%;padding:clamp(14px,2vh,18px) clamp(20px,3vw,32px);
+  border-radius:50px;border:2px solid var(--gold);
+  background:linear-gradient(135deg,rgba(255,209,102,.15),rgba(255,140,66,.15));
+  backdrop-filter:blur(12px);
+  color:var(--text);font-family:var(--fb);font-size:clamp(14px,1.8vw,18px);
+  font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);
+  display:flex;align-items:center;justify-content:center;gap:clamp(8px,1.2vw,12px);
+  box-shadow:0 4px 24px rgba(255,209,102,.3),0 0 0 0 rgba(255,209,102,.4);
+  pointer-events:auto;touch-action:manipulation}
+#game-btn:hover{
+  transform:translateY(-2px) scale(1.02);
+  box-shadow:0 8px 32px rgba(255,209,102,.5),0 0 0 4px rgba(255,209,102,.2);
+  border-color:var(--orange);background:linear-gradient(135deg,rgba(255,209,102,.25),rgba(255,140,66,.25))}
+#game-btn:active{transform:translateY(0) scale(.98)}
+.game-btn-icon{font-size:clamp(20px,2.5vw,28px);line-height:1}
+.game-btn-text{line-height:1.2}
+@media(max-width:480px){
+  #game-button-wrapper{max-width:100%}
+  .game-btn-text{font-size:clamp(12px,3.5vw,14px)}
+}
+#credit{display:flex;align-items:center;gap:clamp(4px,.7vw,7px)}
+#credit-text{font-family:var(--fm);font-size:clamp(9px,1vw,11px);color:var(--muted);
+  letter-spacing:1.5px;white-space:nowrap;display:none}
+@media(min-width:560px){#credit-text{display:inline}}
+#ig-link{display:inline-flex;align-items:center;gap:5px;font-family:var(--fm);
+  font-size:clamp(10px,1.2vw,12px);font-weight:700;letter-spacing:.8px;text-decoration:none;
+  color:var(--text);padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);transition:all .2s;white-space:nowrap}
+#ig-link:hover{background:rgba(225,48,108,.18);border-color:rgba(225,48,108,.5);color:#e1306c}
+#ig-link svg{width:12px;height:12px;fill:currentColor;flex-shrink:0}
+#portfolio-btn{display:inline-flex;align-items:center;gap:5px;font-family:var(--fm);
+  font-size:clamp(9px,1vw,11px);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  text-decoration:none;white-space:nowrap;padding:5px 11px;border-radius:20px;
+  color:var(--cyan);border:1px solid rgba(0,229,255,.35);background:rgba(0,229,255,.06);
+  transition:all .2s}
+#portfolio-btn:hover{background:rgba(0,229,255,.15);box-shadow:0 0 12px rgba(0,229,255,.2)}
+#portfolio-btn svg{width:10px;height:10px;fill:currentColor;flex-shrink:0}
+
+/* PROGRESS & DOTS & NAV */
+#progress{position:fixed;bottom:0;left:0;height:3px;z-index:200;
+  background:linear-gradient(90deg,var(--cyan),var(--purple));box-shadow:0 0 8px var(--cyan);width:0%}
+#dots{position:fixed;bottom:clamp(10px,1.8vh,16px);left:50%;transform:translateX(-50%);
+  display:flex;gap:5px;z-index:200}
+.dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer;
+  transition:all .3s;touch-action:manipulation}
+.dot.on{background:var(--cyan);width:18px;border-radius:3px;box-shadow:0 0 5px var(--cyan)}
+#nav-prev,#nav-next{position:fixed;top:50%;transform:translateY(-50%);z-index:200;
+  background:rgba(255,255,255,.06);border:1px solid var(--border);color:rgba(221,238,245,.55);
+  font-size:17px;cursor:pointer;width:clamp(28px,3.2vw,40px);height:clamp(28px,3.2vw,40px);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;touch-action:manipulation;backdrop-filter:blur(8px)}
+#nav-prev{left:clamp(5px,1vw,12px)}#nav-next{right:clamp(5px,1vw,12px)}
+#nav-prev:hover,#nav-next:hover{background:rgba(0,229,255,.15);color:var(--cyan)}
+
+/* CAROUSEL */
+#carousel{position:fixed;inset:0;z-index:1;overflow:hidden}
+.slide{position:absolute;inset:0;display:none;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:clamp(44px,6vh,54px) clamp(12px,2.5vw,64px) clamp(44px,6vh,60px)}
+.slide.visible{display:block;animation:sIn .55s cubic-bezier(.22,1,.36,1) both}
+@keyframes sIn{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:translateX(0)}}
+.slide::-webkit-scrollbar{width:3px}.slide::-webkit-scrollbar-thumb{background:rgba(0,229,255,.2);border-radius:2px}
+
+.slide-body{display:flex;flex-direction:column;gap:clamp(12px,1.8vw,22px);
+  min-height:calc(100vh - clamp(90px,13vh,120px));justify-content:center}
+@media(min-width:700px){
+  .slide-body{flex-direction:row;align-items:center;gap:clamp(24px,3.5vw,54px)}
+  .slide-body .left{flex:0 0 38%}.slide-body .right{flex:1}}
+.left,.right{display:flex;flex-direction:column;gap:clamp(9px,1.3vw,14px)}
+
+/* TYPOGRAPHY */
+.slide-num{font-family:var(--fm);font-size:clamp(9px,1.1vw,11px);color:var(--muted);letter-spacing:3px}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:30px;
+  width:fit-content;font-family:var(--fm);font-size:clamp(9px,1vw,11px);
+  letter-spacing:2px;text-transform:uppercase;font-weight:700;border:1px solid currentColor}
+.slide-title{font-family:var(--fh);font-size:clamp(28px,5vw,72px);font-weight:700;line-height:.92;letter-spacing:-1px}
+.slide-sub{font-size:clamp(13px,1.5vw,16px);line-height:1.65;color:rgba(221,238,245,.72)}
+.bar{width:36px;height:3px;border-radius:2px}
+
+/* SOURCES */
+.sources{display:flex;flex-wrap:wrap;gap:5px;align-items:center;
+  padding:clamp(7px,1vh,10px) clamp(10px,1.4vw,14px);
+  background:rgba(255,255,255,.02);border-radius:10px;border:1px solid rgba(255,255,255,.05)}
+.sources-lbl{font-family:var(--fm);font-size:clamp(8px,.9vw,10px);
+  letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+.src-tag{font-family:var(--fm);font-size:clamp(9px,.95vw,11px);color:rgba(221,238,245,.45);
+  padding:2px 7px;border-radius:5px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.06);white-space:nowrap}
+
+/* CARD */
+.card{background:var(--panel);border-radius:16px;padding:clamp(14px,1.8vw,28px);
+  border:1px solid var(--border);position:relative}
+.card-top{position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
+
+/* FACTS */
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:clamp(7px,1vw,12px)}
+.fbox{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:10px;padding:clamp(10px,1.4vw,18px);display:flex;flex-direction:column;gap:5px}
+.fnum{font-family:var(--fh);font-size:clamp(20px,3.2vw,34px);font-weight:700;line-height:1}
+.flabel{font-size:clamp(10px,1.1vw,12px);color:rgba(221,238,245,.55);line-height:1.4}
+
+/* LIST */
+.list{display:flex;flex-direction:column;gap:clamp(5px,.9vw,10px)}
+.item{display:flex;align-items:flex-start;gap:11px;
+  padding:clamp(9px,1.3vw,14px) clamp(11px,1.4vw,16px);
+  border-radius:9px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);
+  font-size:clamp(12px,1.3vw,14px);line-height:1.5}
+.ico{font-size:clamp(16px,2vw,20px);flex-shrink:0;margin-top:1px}
+.badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+  border-radius:50%;font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px}
+.wstrip{display:flex;align-items:flex-start;gap:11px;
+  padding:clamp(9px,1.3vw,14px) clamp(11px,1.4vw,16px);
+  border-radius:9px;border-left:4px solid;background:rgba(255,255,255,.025);
+  font-size:clamp(12px,1.3vw,14px);line-height:1.5;margin-bottom:7px}
+.pwbox{background:rgba(0,0,0,.3);border-radius:11px;padding:clamp(12px,1.8vw,20px);
+  border:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:11px}
+.pwrow{display:flex;align-items:center;gap:9px}
+.pwtxt{font-family:var(--fm);font-size:clamp(10px,1.2vw,12px);flex:0 0 clamp(90px,13vw,155px)}
+.pwtrack{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+.pwfill{height:100%;border-radius:3px}
+.pwlbl{font-family:var(--fm);font-size:clamp(8px,.9vw,10px);letter-spacing:1px;
+  text-transform:uppercase;flex:0 0 52px;text-align:right}
+.rule-item{display:flex;align-items:center;gap:13px;
+  padding:clamp(9px,1.3vw,12px) clamp(11px,1.4vw,16px);border-radius:9px;
+  background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.1);
+  font-size:clamp(12px,1.3vw,14px);line-height:1.4;margin-bottom:7px}
+.rnum{font-family:var(--fh);font-size:clamp(20px,2.5vw,28px);font-weight:700;
+  flex:0 0 30px;text-align:center;color:var(--cyan);line-height:1}
+.sec-lbl{font-family:var(--fm);font-size:clamp(9px,1vw,11px);letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.info-tip{padding:clamp(9px,1.3vw,13px) clamp(11px,1.4vw,15px);border-radius:9px;
+  font-size:clamp(11px,1.2vw,13px)}
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(7px,1vw,12px)}
+.ai-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:11px;padding:clamp(10px,1.4vw,18px);display:flex;flex-direction:column;gap:7px}
+.ai-icon{font-size:clamp(18px,2.2vw,26px);line-height:1}
+.ai-title{font-size:clamp(12px,1.3vw,14px);font-weight:700;color:var(--purple)}
+.ai-desc{font-size:clamp(10px,1.1vw,12px);color:rgba(221,238,245,.62);line-height:1.5}
+
+/* CYBERBULLYING GRID */
+.cb-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(7px,1vw,12px)}
+.cb-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:11px;padding:clamp(10px,1.4vw,18px);display:flex;flex-direction:column;gap:7px}
+.cb-icon{font-size:clamp(18px,2.2vw,26px);line-height:1}
+.cb-title{font-size:clamp(12px,1.3vw,14px);font-weight:700;color:var(--orange)}
+.cb-desc{font-size:clamp(10px,1.1vw,12px);color:rgba(221,238,245,.62);line-height:1.5}
+
+/* ═══════════════════════
+   GAME OVERLAY (not part of carousel)
+═══════════════════════ */
+#game-slide{
+  display:none;position:fixed;inset:0;z-index:9998;
+  background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:clamp(44px,6vh,54px) 0 clamp(38px,5vh,52px)}
+#game-slide.visible{display:block;animation:sIn .55s cubic-bezier(.22,1,.36,1) both}
+#game-close{
+  position:fixed;top:clamp(12px,2vh,18px);right:clamp(12px,2.5vw,24px);z-index:9999;
+  width:clamp(36px,4.5vw,44px);height:clamp(36px,4.5vw,44px);
+  border-radius:50%;border:1px solid var(--border);
+  background:rgba(255,255,255,.06);backdrop-filter:blur(8px);
+  color:var(--text);font-size:clamp(16px,2vw,20px);font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;touch-action:manipulation}
+#game-close:hover{background:rgba(255,75,110,.15);border-color:var(--red);color:var(--red)}
+#game-slide::-webkit-scrollbar{width:3px}
+#game-slide::-webkit-scrollbar-thumb{background:rgba(0,229,255,.2);border-radius:2px}
+#game-wrap{max-width:760px;margin:0 auto;padding:0 clamp(12px,2.5vw,28px);
+  display:flex;flex-direction:column;justify-content:center;
+  min-height:calc(100vh - clamp(82px,11vh,106px))}
+.gscreen{animation:sIn .4s cubic-bezier(.22,1,.36,1) both}
+
+/* ENTRY */
+#screen-entry{display:flex;flex-direction:column;gap:clamp(18px,2.8vh,28px)}
+#entry-eyebrow{font-family:var(--fm);font-size:clamp(9px,1.1vw,11px);
+  color:var(--muted);letter-spacing:3px;text-transform:uppercase}
+#entry-title{font-family:var(--fh);font-size:clamp(30px,5.5vw,62px);font-weight:700;
+  line-height:.9;letter-spacing:-1px;color:var(--gold)}
+#entry-desc{font-size:clamp(13px,1.5vw,16px);color:rgba(221,238,245,.65);line-height:1.65;max-width:500px}
+#entry-stats{display:flex;gap:8px;flex-wrap:wrap}
+.estat{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:18px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  font-family:var(--fm);font-size:clamp(10px,1.2vw,12px);color:var(--muted);letter-spacing:1px}
+.estat strong{color:var(--text)}
+#entry-start-btn{padding:clamp(14px,2vh,18px) clamp(32px,4vw,48px);
+  border-radius:12px;border:none;cursor:pointer;background:var(--cyan);color:#07090f;
+  font-family:var(--fb);font-size:clamp(15px,1.8vw,18px);font-weight:800;letter-spacing:.5px;
+  box-shadow:0 0 22px rgba(0,229,255,.35);transition:transform .12s,box-shadow .2s;
+  touch-action:manipulation;white-space:nowrap;margin-top:6px}
+#entry-start-btn:hover{transform:scale(1.03);box-shadow:0 0 30px rgba(0,229,255,.5)}
+#entry-start-btn:active{transform:scale(.97)}
+
+/* IN-GAME */
+#screen-game{display:flex;flex-direction:column}
+#game-header{display:flex;align-items:center;justify-content:flex-end;
+  gap:10px;margin-bottom:clamp(10px,1.8vh,16px);flex-wrap:wrap}
+#game-score-block{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.score-pill{display:flex;flex-direction:column;align-items:center;
+  padding:clamp(5px,.9vh,8px) clamp(10px,1.7vw,16px);
+  border-radius:9px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+.score-num{font-family:var(--fh);font-size:clamp(18px,2.2vw,24px);font-weight:700;line-height:1}
+.score-lbl{font-family:var(--fm);font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);margin-top:1px}
+#diff-badge{font-family:var(--fm);font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  padding:3px 9px;border-radius:18px}
+
+#game-pips{display:flex;gap:5px;margin-bottom:clamp(9px,1.4vh,13px);flex-wrap:wrap}
+.pip{flex:1;min-width:18px;max-width:40px;height:4px;border-radius:2px;
+  background:rgba(255,255,255,.1);transition:background .3s}
+.pip.done-correct{background:var(--green)}.pip.done-wrong{background:var(--red)}
+.pip.current{background:var(--gold);box-shadow:0 0 5px var(--gold)}
+
+/* MSG CARD — no position relative needed anymore */
+#msg-card{background:var(--panel);border-radius:14px;
+  padding:clamp(14px,2vw,22px) clamp(14px,2vw,24px);
+  border:1px solid var(--border);margin-bottom:clamp(9px,1.4vh,13px);
+  display:flex;flex-direction:column;gap:clamp(7px,1vh,11px);position:relative}
+#msg-type-badge{position:absolute;top:11px;right:11px;font-family:var(--fm);font-size:8px;
+  letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:14px;
+  background:rgba(255,255,255,.06);color:rgba(221,238,245,.45);border:1px solid var(--border)}
+#msg-sender{display:flex;align-items:center;gap:9px;padding-right:65px}
+#msg-avatar{width:clamp(32px,3.5vw,38px);height:clamp(32px,3.5vw,38px);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(15px,1.8vw,18px);flex-shrink:0;background:rgba(255,255,255,.06)}
+#msg-from{font-size:clamp(10px,1.2vw,12px);color:var(--muted);font-family:var(--fm)}
+#msg-from strong{color:var(--text);font-size:clamp(12px,1.4vw,14px);display:block;margin-bottom:1px}
+#msg-body{font-size:clamp(13px,1.6vw,16px);line-height:1.6;white-space:pre-wrap}
+#msg-detail{font-family:var(--fm);font-size:clamp(9px,1.1vw,11px);color:var(--muted);
+  padding-top:7px;border-top:1px solid rgba(255,255,255,.05)}
+
+/* ── FEEDBACK: Full-screen overlay modal (NOT inside msg-card anymore) ── */
+/* ── FEEDBACK OVERLAY — tam ekran modal, her zaman DOM'da, visibility ile kontrol ── */
+#feedback-overlay{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  padding:clamp(14px,2.5vw,36px);
+  background:rgba(7,9,15,.92);backdrop-filter:blur(8px);
+  /* başlangıçta gizli */
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .22s ease, visibility .22s ease}
+#feedback-overlay.show{
+  opacity:1;visibility:visible;pointer-events:auto}
+
+#feedback-box{
+  width:100%;max-width:620px;
+  border-radius:22px;
+  padding:clamp(22px,3.2vw,42px) clamp(18px,2.8vw,38px);
+  display:flex;flex-direction:column;align-items:center;
+  gap:clamp(12px,1.8vh,18px);
+  text-align:center;
+  transform:scale(.92) translateY(16px);
+  transition:transform .32s cubic-bezier(.34,1.46,.64,1)}
+#feedback-overlay.show #feedback-box{transform:scale(1) translateY(0)}
+
+#feedback-box.correct{background:rgba(4,38,28,.97);border:2px solid var(--green);
+  box-shadow:0 0 40px rgba(6,214,160,.18),0 20px 60px rgba(0,0,0,.5)}
+#feedback-box.wrong{background:rgba(44,7,14,.97);border:2px solid var(--red);
+  box-shadow:0 0 40px rgba(255,75,110,.18),0 20px 60px rgba(0,0,0,.5)}
+#feedback-box.timeout{background:rgba(18,18,38,.97);border:2px solid var(--gold);
+  box-shadow:0 0 30px rgba(255,209,102,.14),0 20px 60px rgba(0,0,0,.5)}
+
+#fb-emoji{font-size:clamp(48px,7vw,80px);line-height:1}
+
+#fb-verdict{
+  font-family:var(--fh);font-size:clamp(22px,3vw,36px);font-weight:700;line-height:1.1}
+
+#fb-explain{
+  font-size:clamp(14px,1.7vw,17px);line-height:1.7;
+  color:var(--text);
+  width:100%;max-width:540px;
+  background:rgba(255,255,255,.07);
+  border-radius:14px;
+  padding:clamp(12px,1.8vw,18px) clamp(14px,2vw,22px);
+  border:1px solid rgba(255,255,255,.1);
+  text-align:left}
+
+#fb-next{
+  margin-top:4px;
+  padding:clamp(13px,1.8vh,18px) clamp(32px,4vw,52px);
+  border-radius:40px;font-size:clamp(15px,1.8vw,18px);font-weight:800;
+  font-family:var(--fb);cursor:pointer;border:none;letter-spacing:.5px;
+  transition:transform .12s,box-shadow .2s;touch-action:manipulation;
+  box-shadow:0 4px 20px rgba(0,0,0,.3)}
+#fb-next:hover{transform:scale(1.05)}
+#fb-next:active{transform:scale(.96)}
+
+/* HINT */
+#hint-area{margin-bottom:clamp(6px,.9vh,10px)}
+#hint-text{display:none;font-size:clamp(11px,1.3vw,13px);font-family:var(--fm);color:var(--gold);
+  padding:7px 12px;background:rgba(255,209,102,.07);border-radius:9px;
+  border:1px solid rgba(255,209,102,.15);margin-bottom:7px;line-height:1.5}
+#hint-btn{font-family:var(--fm);font-size:clamp(9px,1vw,11px);letter-spacing:1.5px;
+  text-transform:uppercase;padding:clamp(6px,.9vh,8px) clamp(11px,1.8vw,15px);border-radius:18px;
+  border:1px solid rgba(255,209,102,.3);background:rgba(255,209,102,.05);
+  color:var(--gold);cursor:pointer;transition:background .2s;touch-action:manipulation;width:100%}
+#hint-btn:hover{background:rgba(255,209,102,.12)}
+#hint-btn:disabled{opacity:.3;cursor:default}
+
+/* ANSWER BUTTONS */
+#answer-btns{display:flex;gap:clamp(9px,1.8vw,13px);width:100%}
+.ans-btn{flex:1;padding:clamp(13px,1.9vh,18px) clamp(9px,1.7vw,14px);border-radius:11px;
+  border:2px solid;cursor:pointer;font-family:var(--fb);font-size:clamp(13px,1.5vw,16px);
+  font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;
+  transition:transform .1s,background .2s,box-shadow .2s;background:transparent;
+  user-select:none;touch-action:manipulation}
+.ans-btn:active{transform:scale(.96)}
+.ans-btn .btn-emoji{font-size:clamp(18px,2.5vw,24px)}
+.ans-btn .btn-label{font-size:clamp(10px,1.2vw,13px);letter-spacing:.4px;text-transform:uppercase}
+#btn-scam{border-color:var(--red);color:var(--red)}
+#btn-legit{border-color:var(--green);color:var(--green)}
+#btn-scam:hover{background:rgba(255,75,110,.12);box-shadow:0 0 16px rgba(255,75,110,.2)}
+#btn-legit:hover{background:rgba(6,214,160,.12);box-shadow:0 0 16px rgba(6,214,160,.2)}
+
+/* RESULTS */
+#screen-results{display:flex;flex-direction:column;align-items:center;
+  gap:clamp(11px,1.8vh,16px);text-align:center;padding:clamp(8px,1.5vh,16px) 0}
+#res-grade{font-family:var(--fh);font-size:clamp(56px,9.5vw,96px);font-weight:700;
+  line-height:1;animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both}
+#res-score-big{font-family:var(--fh);font-size:clamp(32px,5.5vw,58px);font-weight:700;
+  color:var(--cyan);line-height:1}
+#res-title{font-family:var(--fh);font-size:clamp(15px,2vw,20px);font-weight:700}
+#res-msg{font-size:clamp(13px,1.4vw,15px);color:rgba(221,238,245,.7);max-width:480px;line-height:1.6}
+#res-pills{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+.rb-pill{padding:7px 14px;border-radius:9px;font-family:var(--fm);
+  font-size:clamp(9px,1vw,11px);letter-spacing:1px;text-transform:uppercase}
+#res-replay{padding:clamp(12px,1.6vh,15px) clamp(24px,3.5vw,40px);border-radius:40px;
+  font-size:clamp(14px,1.6vw,16px);font-weight:800;cursor:pointer;border:none;letter-spacing:.5px;
+  background:var(--cyan);color:#07090f;box-shadow:0 0 22px rgba(0,229,255,.3);
+  transition:transform .12s,box-shadow .2s;touch-action:manipulation}
+#res-replay:hover{transform:scale(1.04);}
+#res-replay:active{transform:scale(.97)}
+
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}
+  40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.shake{animation:shake .4s ease}
+</style>
+</head>
+<body>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+
+<!-- FEEDBACK OVERLAY (tam ekran, kart dışında) -->
+<div id="feedback-overlay">
+  <div id="feedback-box">
+    <div id="fb-emoji"></div>
+    <div id="fb-verdict"></div>
+    <div id="fb-explain"></div>
+    <button id="fb-next">Sonraki →</button>
+  </div>
+</div>
+
+<div id="topbar">
+  <div class="logo"><div class="logo-dot"></div><span>Dijital Okuryazarlık</span></div>
+  <div id="topbar-right">
+    <div id="credit">
+      <span id="credit-text">yapan:</span>
+      <a id="ig-link" href="https://instagram.com/can_akalin" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        Can Akalın
+      </a>
+    </div>
+    <a id="portfolio-btn" href="https://canhoca.netlify.app" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      <span>Portfolyo</span>
+    </a>
+    <div id="clock">--:--</div>
+  </div>
+</div>
+<!-- GAME BUTTON (prominent, always visible) -->
+<div id="game-button-wrapper">
+  <button id="game-btn" onclick="startGame()">
+    <span class="game-btn-icon">🎮</span>
+    <span class="game-btn-text">DOLANDIRILDIN MI? OYUNU OYNA</span>
+  </button>
+</div>
+
+<div id="progress"></div>
+<div id="dots"></div>
+<button id="nav-prev">‹</button>
+<button id="nav-next">›</button>
+
+<div id="carousel">
+
+<!-- ── S1: Giriş ── -->
+<div class="slide visible">
+  <div class="slide-body">
+    <div class="left">
+      <div class="slide-num">01 / 09</div>
+      <div class="tag" style="color:var(--cyan);border-color:var(--cyan);background:rgba(0,229,255,.08)">◉ Dijital Okuryazarlık</div>
+      <div class="slide-title" style="color:var(--cyan)">İNTERNETİ<br>BİLEN<br>KAZANIR</div>
+      <div class="bar" style="background:var(--cyan)"></div>
+      <div class="slide-sub">Her gün saatlerce telefona bakıyoruz ama interneti gerçekten biliyor muyuz? Ekran başında geçirdiğin zaman seni zeki de yapabilir, kandırılmış da bırakabilir.</div>
+    </div>
+    <div class="right">
+      <div class="card">
+        <div class="card-top" style="background:linear-gradient(90deg,var(--cyan),var(--purple))"></div>
+        <div class="facts">
+          <div class="fbox"><div class="fnum" style="color:var(--cyan)">6<span style="font-size:.5em"> Mly</span></div><div class="flabel">Dünyada aktif internet kullanıcısı (2026)</div></div>
+          <div class="fbox"><div class="fnum" style="color:var(--gold)">77.5M</div><div class="flabel">Türkiye'de internet kullanıcısı (%88.3)</div></div>
+          <div class="fbox"><div class="fnum" style="color:var(--red)">7.2<span style="font-size:.5em"> sa</span></div><div class="flabel">Günde ortalama ekrana bakıyoruz (TR)</div></div>
+          <div class="fbox"><div class="fnum" style="color:var(--green)">62.3M</div><div class="flabel">Türkiye'de sosyal medya kullanıcısı</div></div>
+        </div>
+      </div>
+      <div class="sources">
+        <span class="sources-lbl">Kaynak:</span>
+        <span class="src-tag">DataReportal — Digital 2026 Turkey (Kasım 2025)</span>
+        <span class="src-tag">We Are Social &amp; Meltwater — Digital 2025</span>
+        <span class="src-tag">TÜİK — Hanehalkı BT Kullanım Araştırması 2025</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S2: Yalan Haber ── -->
+<div class="slide">
+  <div class="slide-body">
+    <div class="left">
+      <div class="slide-num">02 / 09</div>
+      <div class="tag" style="color:var(--red);border-color:var(--red);background:rgba(255,75,110,.08)">⚠ Yalan Haber</div>
+      <div class="slide-title" style="color:var(--red)">PAYLAŞ<br>DEME,<br>ÖNCE BAK</div>
+      <div class="bar" style="background:var(--red)"></div>
+      <div class="slide-sub">MIT araştırması: yalan haberler gerçeklere göre sosyal medyada <strong>6 kat</strong> daha hızlı yayılıyor. Paylaşmadan önce iki dakika ayırmak seni bu zincirin parçası olmaktan kurtarır.</div>
+    </div>
+    <div class="right">
+      <div class="card">
+        <div class="card-top" style="background:var(--red)"></div>
+        <div class="list">
+          <div class="item" style="border-color:rgba(255,75,110,.15)"><span class="ico">🔍</span><div><strong>Kim yazmış?</strong> "haberler24x7.xyz" resmi kaynak değil.</div></div>
+          <div class="item" style="border-color:rgba(255,75,110,.15)"><span class="ico">📅</span><div><strong>Tarihe bak.</strong> 2018'den kalma haber bugünmüş gibi viral olabiliyor.</div></div>
+          <div class="item" style="border-color:rgba(255,75,110,.15)"><span class="ico">😤</span><div><strong>Çok sinirlettiriyorsa dur.</strong> Öfke beyni kapatır — bu kasıtlı bir tasarım.</div></div>
+          <div class="item" style="border-color:rgba(255,75,110,.15)"><span class="ico">✅</span><div><strong>Teyit.org</strong> ve <strong>Doğruluk Payı</strong> — şüpheliyse oraya at.</div></div>
+        </div>
+      </div>
+      <div class="sources">
+        <span class="sources-lbl">Kaynak:</span>
+        <span class="src-tag">Vosoughi, Roy &amp; Aral — Science dergisi, 2018 (MIT)</span>
+        <span class="src-tag">Reuters Institute — Digital News Report 2023</span>
+        <span class="src-tag">teyit.org · dogrulukpayi.com</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S3: Gizlilik ── -->
+<div class="slide">
+  <div class="slide-body">
+    <div class="left">
+      <div class="slide-num">03 / 09</div>
+      <div class="tag" style="color:var(--gold);border-color:var(--gold);background:rgba(255,209,102,.08)">🔐 Gizlilik</div>
+      <div class="slide-title" style="color:var(--gold)">SEN<br>ÜRÜNSÜN,<br>BİLİYOR<br>MUYDUN?</div>
+      <div class="bar" style="background:var(--gold)"></div>
+      <div class="slide-sub">Instagram, TikTok, YouTube — hepsi ücretsiz. Para kazanma modeli: davranış verilerini reklamcılara satmak. Sen ürünsün.</div>
+    </div>
+    <div class="right">
+      <div class="card">
+        <div class="card-top" style="background:var(--gold)"></div>
+        <div class="list">
+          <div class="item" style="border-color:rgba(255,209,102,.15)"><div class="badge" style="background:rgba(255,209,102,.15);color:var(--gold)">!</div><div>Uygulama konum, mikrofon, rehber istiyor mu? <strong>Neden gerekli?</strong> diye sor.</div></div>
+          <div class="item" style="border-color:rgba(255,209,102,.15)"><div class="badge" style="background:rgba(255,209,102,.15);color:var(--gold)">!</div><div>Doğum tarihin, okulun, mahallen herkese açıksa — tanımadığın herkes görüyor.</div></div>
+          <div class="item" style="border-color:rgba(255,209,102,.15)"><div class="badge" style="background:rgba(255,209,102,.15);color:var(--gold)">!</div><div>Paylaştığın fotoğraflar EXIF meta verisiyle konum bilgisi taşıyabilir.</div></div>
+          <div class="item" style="border-color:rgba(255,209,102,.15)"><div class="badge" style="background:rgba(255,209,102,.15);color:var(--gold)">!</div><div>Herkese açık Wi-Fi'da bankacılık yapma. Aynı ağdaki kişi trafiğini izleyebilir.</div></div>
+        </div>
+      </div>
+      <div class="sources">
+        <span class="sources-lbl">Kaynak:</span>
+        <span class="src-tag">Shoshana Zuboff — The Age of Surveillance Capitalism, 2019</span>
+        <span class="src-tag">KVKK — Kişisel Verileri Koruma Kurumu, kvkk.gov.tr</span>
+        <span class="src-tag">EFF — Electronic Frontier Foundation, eff.org</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S4: Şifre ── -->
+<div class="slide">
+  <div class="slide-body">
+    <div class="left">
+      <div class="slide-num">04 / 09</div>
+      <div class="tag" style="color:var(--green);border-color:var(--green);background:rgba(6,214,160,.08)">🛡 Hesap Güvenliği</div>
+      <div class="slide-title" style="color:var(--green)">ŞİFREN<br>"123456"<br>MI?<br>Ağlıyorum.</div>
+      <div class="bar" style="background:var(--green)"></div>
+      <div class="slide-sub">NordPass 2023: "123456" hâlâ dünyanın en yaygın şifresi. Kırılması: 1 saniyeden az. Hesapların çalınırsa DM'lerin, fotoların, her şeyin gider.</div>
+    </div>
+    <div class="right">
+      <div class="card">
+        <div class="card-top" style="background:var(--green)"></div>
+        <div class="sec-lbl">Şifre Gücü</div>
+        <div class="pwbox">
+          <div class="pwrow"><div class="pwtxt">123456</div><div class="pwtrack"><div class="pwfill" style="width:7%;background:var(--red)"></div></div><div class="pwlbl" style="color:var(--red)">ÇÖP</div></div>
+          <div class="pwrow"><div class="pwtxt">dogum_adim</div><div class="pwtrack"><div class="pwfill" style="width:20%;background:var(--orange)"></div></div><div class="pwlbl" style="color:var(--orange)">ZAYIF</div></div>
+          <div class="pwrow"><div class="pwtxt">Deniz@2007</div><div class="pwtrack"><div class="pwfill" style="width:52%;background:var(--gold)"></div></div><div class="pwlbl" style="color:var(--gold)">ORTA</div></div>
+          <div class="pwrow"><div class="pwtxt">K9#mR$xL2!qZ</div><div class="pwtrack"><div class="pwfill" style="width:96%;background:var(--green)"></div></div><div class="pwlbl" style="color:var(--green)">GÜÇLÜ</div></div>
+        </div>
+        <div class="info-tip" style="margin-top:9px;background:rgba(6,214,160,.06);border:1px solid rgba(6,214,160,.15)">
+          💡 Şifre yöneticisi kur — <strong>Bitwarden</strong> (ücretsiz, açık kaynak).
+        </div>
+      </div>
+      <div class="sources">
+        <span class="sources-lbl">Kaynak:</span>
+        <span class="src-tag">NordPass — Top 200 Most Common Passwords 2023</span>
+        <span class="src-tag">NIST — SP 800-63B Digital Identity Guidelines</span>
+        <span class="src-tag">Have I Been Pwned — haveibeenpwned.com</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S5: Sosyal Medya ── -->
+<div class="slide">
+  <div class="slide-body">
+    <div class="left">
+      <div class="slide-num">05 / 09</div>
+      <div class="tag" style="color:var(--purple);border-color:var(--purple);background:rgba(179,136,255,.08)">📱 Sosyal Medya</div>
+      <div class="slide-title" style="color:var(--purple)">ALGORİTMA<br>SENİN<br>ARKADAŞIN<br>DEĞİL</div>
+      <div class="bar" style="background:var(--purple)"></div>
+      <div class="slide-sub">Sana ne gösterileceğine sen karar vermiyorsun. Algoritma "engagement" için tasarlanmış — seni ekranda tutmak için öfke ve kaygı yaratan içerikleri önceliyor.</div>
+    </div>
+    <div class="right">
+      <div class="card">
+        <div class="card-top" style="background:var(--purple)"></div>
+        <div class="list">
+          <div class="item" style="border-color:rgba(179,136,255,.18)"><span class="ico">🫧</span><div><strong style="color:var(--purple)">Filtre balonu:</strong> Algoritma farklı görüşlere maruziyeti azaltıyor — dünya sana çarpık görünür.</div></div>
+          <div class="item" style="border-color:rgba(179,136,255,.18)"><span class="ico">✨</span><div><strong style="color:var(--purple)">Karşılaştırma tuzağı:</strong> O "mükemmel hayat", süzülmüş en iyi anlardır.</div></div>
+          <div class="item" style="border-color:rgba(179,136,255,.18)"><span class="ico">🤖</span><div><strong style="color:var(--purple)">Deepfake:</strong> AI siyasetçileri istediği gibi konuşturabiliyor. Her zaman kaynağını araştır.</div></div>
+          <div class="item" style="border-color:rgba(179,136,255,.18)"><span class="ico">⏱️</span><div><strong style="color:var(--purple)">Ekran süresi:</strong> Telefon ayarlarından haftalık raporunu aç ve gerçeği gör.</div></div>
+        </div>
+      </div>
+      <div class="sources">
+        <span class="sources-lbl">Kaynak:</span>
+        <span class="src-tag">Eli Pariser — The Filter Bubble, 2011</span>
+        <span class="src-tag">Frances Haugen — Facebook Whistleblower Docs, 2021</span>
+        <span class="src-tag">Digital 2026 Turkey — DataReportal (Kasım 2025)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S6: Dolandırıcılık ── -->
+<div class="slide">
+  <div class="slide-body">
+    <div class="left">
+      <div class="slide-num">06 / 09</div>
+      <div class="tag" style="color:var(--red);border-color:var(--red);background:rgba(255,75,110,.08)">🎣 Dolandırıcılık</div>
+      <div class="slide-title" style="color:var(--red)">"KAZANDIN!"<br>YAZAN<br>MESAJ<br>YALAN.</div>
+      <div class="bar" style="background:var(--red)"></div>
+      <div class="slide-sub">BDDK 2024-2025: Türkiye'de siber dolandırıcılık şikayetleri artmaya devam ediyor. Hedef genellikle gençler. Tanıdık ses, logo ve URL bile sahte olabilir.</div>
+    </div>
+    <div class="right">
+      <div class="card">
+        <div class="card-top" style="background:var(--red)"></div>
+        <div class="wstrip" style="border-color:var(--red);background:rgba(255,75,110,.06)"><span class="ico">📧</span><div><strong>Mail adresine bak.</strong> "destek@instagram-güvenlik.com" Instagram değil.</div></div>
+        <div class="wstrip" style="border-color:var(--red);background:rgba(255,75,110,.06)"><span class="ico">🔗</span><div><strong>URL'e bak.</strong> "ınstagram.com" (Türkçe ı) sahte site — homoglyph saldırısı.</div></div>
+        <div class="wstrip" style="border-color:var(--red);background:rgba(255,75,110,.06)"><span class="ico">🚨</span><div><strong>"Acele et!" diyorsa dur.</strong> Yapay aciliyet karar verme kapasiteni düşürür.</div></div>
+        <div class="wstrip" style="border-color:var(--gold);background:rgba(255,209,102,.06)"><span class="ico">🏦</span><div><strong>Banka SMS ile şifre istemez.</strong> İsterse 444'lü numarayı ara, linke tıklama.</div></div>
+      </div>
+      <div class="sources">
+        <span class="sources-lbl">Kaynak:</span>
+        <span class="src-tag">BDDK — Finansal Tüketici Bildirimleri 2024-2025</span>
+        <span class="src-tag">BTK — Siber Güvenlik Farkındalık Rehberi 2025</span>
+        <span class="src-tag">CISA — Phishing Guidance, cisa.gov</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S7: Yapay Zeka ── -->
+<div class="slide">
+  <div class="slide-body">
+    <div class="left">
+      <div class="slide-num">07 / 09</div>
+      <div class="tag" style="color:var(--purple);border-color:var(--purple);background:rgba(179,136,255,.1)">🤖 Yapay Zeka</div>
+      <div class="slide-title" style="color:var(--purple)">AI HER<br>ŞEYE<br>BENZEYEBİLİR.<br>SEN?</div>
+      <div class="bar" style="background:var(--purple)"></div>
+      <div class="slide-sub">2024-2025: ses klonlama 3 saniyelik örnekle çalışıyor, deepfake üretimi dakikalar alıyor, AI mükemmel Türkçe yazıyor. Teknoloji değil, farkındalık seni korur.</div>
+    </div>
+    <div class="right">
+      <div class="card">
+        <div class="card-top" style="background:linear-gradient(90deg,var(--purple),var(--cyan))"></div>
+        <div class="ai-grid">
+          <div class="ai-box"><div class="ai-icon">🎭</div><div class="ai-title">Deepfake Video</div><div class="ai-desc">Gerçek kişilerin ağzından söylemediği sözler söyletilebiliyor. Ellere ve arka plana dikkat et.</div></div>
+          <div class="ai-box"><div class="ai-icon">🎙️</div><div class="ai-title">Ses Klonlama</div><div class="ai-desc">3 sn'lik ses örneğiyle klon oluşuyor. Tanıdık ses ≠ otomatik güven.</div></div>
+          <div class="ai-box"><div class="ai-icon">✍️</div><div class="ai-title">AI Yazı Tuzakları</div><div class="ai-desc">LLM'ler mükemmel Türkçe üretiyor. Dil hatası artık güvenilir bir ipucu değil.</div></div>
+          <div class="ai-box"><div class="ai-icon">🖼️</div><div class="ai-title">Sahte Görsel</div><div class="ai-desc">AI görseli gerçekten ayırt edilemiyor. Google Görseller ile ters arama yap.</div></div>
+        </div>
+      </div>
+      <div class="sources">
+        <span class="sources-lbl">Kaynak:</span>
+        <span class="src-tag">MIT Technology Review — AI Voice Cloning 2024-2025</span>
+        <span class="src-tag">Europol — Law Enforcement &amp; Deepfakes 2024</span>
+        <span class="src-tag">TÜBİTAK BİLGEM — YZ Güvenlik Rehberi 2024-2025</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S8: Siber Zorbalık ── -->
+<div class="slide">
+  <div class="slide-body">
+    <div class="left">
+      <div class="slide-num">08 / 09</div>
+      <div class="tag" style="color:var(--orange);border-color:var(--orange);background:rgba(255,140,66,.1)">🛑 Siber Zorbalık</div>
+      <div class="slide-title" style="color:var(--orange)">EKRANDA<br>DA ACISI<br>GERÇEK.</div>
+      <div class="bar" style="background:var(--orange)"></div>
+      <div class="slide-sub">Türkiye'de her 3 gençten 1'i çevrimiçi zorbalığa maruz kaldığını bildiriyor. Anonimlik cesaret vermiyor — cesaretsizliği gizliyor.</div>
+    </div>
+    <div class="right">
+      <div class="card">
+        <div class="card-top" style="background:var(--orange)"></div>
+        <div class="cb-grid">
+          <div class="cb-box"><div class="cb-icon">📸</div><div class="cb-title">İzinsiz Paylaşım</div><div class="cb-desc">Birinin fotoğrafını/videosunu rızası olmadan paylaşmak Türk Ceza Kanunu'nda suçtur (TCK 134–135).</div></div>
+          <div class="cb-box"><div class="cb-icon">👤</div><div class="cb-title">Sahte Hesap</div><div class="cb-desc">Birinin kimliğini taklit eden hesap açmak TCK 135–136 kapsamında işlem görür.</div></div>
+          <div class="cb-box"><div class="cb-icon">🔇</div><div class="cb-title">Dışlama / Ignore</div><div class="cb-desc">Sistematik dışlama da siber zorbalık sayılır. "Sadece oyun" değil.</div></div>
+          <div class="cb-box"><div class="cb-icon">🆘</div><div class="cb-title">Ne Yapmalı?</div><div class="cb-desc">Ekran görüntüsü al, engelle, güvendiğin bir yetişkine veya 182 ALO Psikiyatri Hattı'na başvur.</div></div>
+        </div>
+        <div class="info-tip" style="margin-top:9px;background:rgba(255,140,66,.07);border:1px solid rgba(255,140,66,.2)">
+          🛡 <strong>Seni izliyorsa:</strong> e-Devlet → "İnternet İçerik Bildirimi" veya BTK'ya şikayet: www.ihbarweb.org.tr
+        </div>
+      </div>
+      <div class="sources">
+        <span class="sources-lbl">Kaynak:</span>
+        <span class="src-tag">UNICEF Türkiye — Çocuklar ve Dijital Ortam 2024</span>
+        <span class="src-tag">TCK Madde 134–136 (Özel Hayata Karşı Suçlar)</span>
+        <span class="src-tag">BTK — ihbarweb.org.tr · ALO 182 (2025)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── S9: Özet ── -->
+<div class="slide">
+  <div class="slide-body">
+    <div class="left">
+      <div class="slide-num">09 / 09</div>
+      <div class="tag" style="color:var(--cyan);border-color:var(--cyan);background:rgba(0,229,255,.08)">★ Özet</div>
+      <div class="slide-title" style="color:var(--cyan)">İNTERNET<br>BÜYÜK VE<br>KARIŞIK.<br>SEN AKILLI OL.</div>
+      <div class="bar" style="background:var(--cyan)"></div>
+      <div class="slide-sub">Dijital okuryazarlık okullarda yeterince öğretilmiyor ama hayatının her alanını etkiliyor. Bu 6 kuralı aklında tutarsan çoğu tuzaktan korunursun.</div>
+    </div>
+    <div class="right">
+      <div class="card">
+        <div class="card-top" style="background:linear-gradient(90deg,var(--cyan),var(--green))"></div>
+        <div class="sec-lbl" style="margin-bottom:11px">Aklında kalsın</div>
+        <div class="rule-item"><div class="rnum">1</div><div><strong>Paylaşmadan önce sor:</strong> Kim yazmış, tarihi ne, kaynağı güvenilir mi?</div></div>
+        <div class="rule-item"><div class="rnum">2</div><div><strong>Şifreni güçlendir</strong> ve her hesapta farklı kullan.</div></div>
+        <div class="rule-item"><div class="rnum">3</div><div><strong>Verilerini koru.</strong> Ücretsiz uygulama = sen ürünsün.</div></div>
+        <div class="rule-item"><div class="rnum">4</div><div><strong>AI'ya da şüpheyle bak.</strong> Ses, görsel, video sahte olabilir.</div></div>
+        <div class="rule-item"><div class="rnum">5</div><div><strong>"Acele et / kazandın"</strong> diyen her mesaj muhtemelen tuzak.</div></div>
+        <div class="rule-item"><div class="rnum">6</div><div><strong>Siber zorbalığa seyirci kalma.</strong> Ekran görüntüsü al, bildir, destek ol.</div></div>
+      </div>
+      <div class="sources">
+        <span class="sources-lbl">Kaynak:</span>
+        <span class="src-tag">MEB — Dijital Okuryazarlık Çerçevesi 2024-2025</span>
+        <span class="src-tag">OECD — Digital Literacy Framework 2024</span>
+        <span class="src-tag">UNESCO — Media &amp; Info Literacy Curriculum 2024</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /carousel -->
+
+<!-- ═══════════════════════
+     GAME OVERLAY (independent, not in carousel)
+═══════════════════════ -->
+<div id="game-slide">
+  <button id="game-close" onclick="closeGame()">✕ Kapat</button>
+  <div id="game-wrap">
+
+    <div id="screen-entry" class="gscreen">
+      <div id="entry-eyebrow">MEB · Dijital Okuryazarlık Projesi</div>
+      <div id="entry-title">DOLANDIRILDIN MI?</div>
+      <div id="entry-desc">Gerçek mi, tuzak mı? 12 senaryo — AI deepfake, ses klonlama, siber zorbalık, phishing ve daha fazlası. Her soruyu dikkatlice oku!</div>
+      <div id="entry-stats">
+        <div class="estat"><strong>12</strong>&nbsp;soru</div>
+        <div class="estat"><strong>+1</strong>&nbsp;doğru</div>
+        <div class="estat" style="color:rgba(255,75,110,.8)"><strong>–1</strong>&nbsp;ipucu cezası</div>
+      </div>
+      <button id="entry-start-btn" onclick="entryStart()">Oyuna Başla →</button>
+    </div>
+
+    <div id="screen-game" style="display:none">
+      <div id="game-header">
+        <div id="game-score-block">
+          <div id="diff-badge"></div>
+          <div class="score-pill"><div class="score-num" id="sc-correct" style="color:var(--green)">0</div><div class="score-lbl">doğru</div></div>
+          <div class="score-pill"><div class="score-num" id="sc-wrong" style="color:var(--red)">0</div><div class="score-lbl">yanlış</div></div>
+        </div>
+      </div>
+      <div id="game-pips"></div>
+      <div id="msg-card">
+        <div id="msg-type-badge"></div>
+        <div id="msg-sender"><div id="msg-avatar"></div><div id="msg-from"></div></div>
+        <div id="msg-body"></div>
+        <div id="msg-detail"></div>
+      </div>
+      <div id="hint-area">
+        <div id="hint-text"></div>
+        <button id="hint-btn" onclick="showHint()">💡 İpucu göster (–1 puan)</button>
+      </div>
+      <div id="answer-btns">
+        <button class="ans-btn" id="btn-scam" onclick="answer(true)"><span class="btn-emoji">🚨</span><span class="btn-label">Tuzak / Zararlı</span></button>
+        <button class="ans-btn" id="btn-legit" onclick="answer(false)"><span class="btn-emoji">✅</span><span class="btn-label">Gerçek &amp; Güvenli</span></button>
+      </div>
+    </div>
+
+    <div id="screen-results" style="display:none">
+      <div id="res-grade"></div>
+      <div id="res-score-big"></div>
+      <div id="res-title"></div>
+      <div id="res-msg"></div>
+      <div id="res-pills"></div>
+      <button id="res-replay" onclick="goEntry()">Tekrar Oyna 🔄</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ══════════════════════
+   SCENARIOS — 22 soruluk havuz, 10 tanesi rastgele seçilir
+   Yeni kategoriler: AI tuzağı, siber zorbalık, derin sahte
+══════════════════════ */
+const SC=[
+  /* ── PHISHING & DOLANDIRICILIK ── */
+  {diff:"orta",type:"SMS",avatar:"📱",from:"Garanti BBVA",fromDetail:"Gönderen: +90 850 222 0 333",
+   body:"Kartınızda yurt dışı işlem girişimi tespit edildi (Miami, $340). İşlemi siz başlatmadıysanız doğrulayın: https://garantibbva.com.tr/güvenlik",
+   detail:"garantibbva.com.tr/güvenlik — URL doğru görünüyor ama bankalar SMS ile link göndermez",
+   hint:"Gerçek bankalar SMS ile link göndermez. Uygulamayı aç ya da 444'ü ara.",
+   isScam:true,emoji:"🎣",
+   explain:"Alan adı gerçekmiş gibi görünüyor ama bankalar SMS ile link göndermez. Doğrudan uygulamayı aç ya da 444 0 333'ü ara. Linke tıklaman giriş bilgilerini çalabilir. [TCK 244: Bilişim sisteminde veri yok etme/değiştirme → 6 ay-3 yıl hapis]"},
+
+  {diff:"zor",type:"DM — Instagram",avatar:"📸",from:"instagram_tr_destek",fromDetail:"@instagram_tr_destek · 12.4B takipçi · Mavi tik ✓",
+   body:"Merhaba! Hesabınız Partner Program'a seçildi. Aylık 3.000–8.000 TL kazanabilirsiniz. Detaylar için WhatsApp'a yönlendiriyoruz: wa.me/+447700123456",
+   detail:"Mavi tikli hesap — ama WhatsApp'a yönlendiriyor · +44 İngiltere numarası",
+   hint:"Instagram resmi iletişimi asla WhatsApp'a yönlendirmez.",
+   isScam:true,emoji:"🎣",
+   explain:"Mavi tik satın alınabilir veya çalınmış olabilir. Instagram'ın resmi iletişimi asla WhatsApp'a yönlendirmez. +44 İngiltere numarası başlı başına kırmızı bayraktır. [TCK 142/2-e: Bilişim sistemi ile dolandırıcılık → 5-10 yıl hapis]"},
+
+  {diff:"orta",type:"E-POSTA",avatar:"🏆",from:"cekilish@turktelekom-kampanya.net",fromDetail:"Gönderen: cekilish@turktelekom-kampanya.net",
+   body:"Tebrikler! Yıllık abonelik çekilişinde Samsung Galaxy S24 kazandınız! Ödülü almak için 48 saat içinde 290 TL kargo + sigorta bedeli ödemeniz gerekiyor.",
+   detail:"turktelekom-kampanya.net — resmi değil (türktelekom.com.tr olmalı)",
+   hint:"Gerçek ödüller için nakliye bedeli ödemezsin.",
+   isScam:true,emoji:"🎣",
+   explain:"Sahte alan adı + 'kazandın ama önce para öde' = klasik advance-fee dolandırıcılığı. Türkiye'de en yaygın dijital dolandırıcılık türlerinden biri. Gerçek ödüllerde kargo bedeli ödemezsin."},
+
+  {diff:"zor",type:"E-POSTA",avatar:"🎓",from:"burs@meb-egitim-destegi.org",fromDetail:"burs@meb-egitim-destegi.org",
+   body:"Sayın Öğrencimiz, MEB Üstün Başarı Burs Programı'na seçildiniz. 12.000 TL burs için T.C. kimlik numaranızı ve banka IBAN bilgilerinizi 3 iş günü içinde iletiniz.",
+   detail:"meb-egitim-destegi.org — resmi MEB adresi meb.gov.tr'dir",
+   hint:"Türkiye devlet kurumlarının resmi adresleri .gov.tr ile biter.",
+   isScam:true,emoji:"🎣",
+   explain:"MEB'in resmi sitesi meb.gov.tr'dir. '.org' uzantısı Türk devlet kurumu değil. Gerçek burs başvuruları e-Devlet üzerinden yapılır — mail ile TC + IBAN talep edilmez."},
+
+  /* ── GERÇEKLERİ ── */
+  {diff:"kolay",type:"E-POSTA",avatar:"📧",from:"noreply@google.com",fromDetail:"Gönderen: noreply@google.com ✓",
+   body:"Google Hesabınızda yeni cihaz oturumu açıldı.\nCihaz: iPhone 13, İstanbul, TR\nBu siz değilseniz: myaccount.google.com",
+   detail:"google.com alan adı doğru ✓ · Şüpheliysen adresi kendin yaz",
+   hint:"Alan adı gerçek mi? Senden ne istiyor?",
+   isScam:false,emoji:"✅",
+   explain:"google.com'dan gelen gerçek güvenlik bildirimi. Ama dikkat: linke tıklamak yerine tarayıcıdan myaccount.google.com'a kendin git — phishing sayfaları birebir kopyalanabilir."},
+
+  {diff:"kolay",type:"SMS",avatar:"📱",from:"PTT Kargo",fromDetail:"PTT (kısa kod: 6682)",
+   body:"Paketiniz 15.02.2025 tarihinde şubemize ulaşmıştır. En yakın PTT şubesine kimliğinizle gelin. Takip: 73829104820",
+   detail:"Resmi kısa kod ✓ · Link yok ✓ · Para talebi yok ✓",
+   hint:"Gerçek kargo SMS'leri link veya para ister mi?",
+   isScam:false,emoji:"✅",
+   explain:"PTT'nin resmi kısa kodundan gelmiş, link veya para talebi yok. Meşru bildirim. Şüpheliysen ptt.gov.tr'den takip numarasıyla kendin kontrol et."},
+
+  {diff:"orta",type:"SMS",avatar:"💳",from:"Yapı Kredi",fromDetail:"Gönderen: YAPIKREDI (resmi kısa kod)",
+   body:"1 adet 3D Secure işlem onayı: Amazon.com.tr'de 849,90 TL. Onay kodu: 482917. Bu kodu sadece işlemi SİZ başlattıysanız kullanın. KİMSEYLE PAYLAŞMAYIN.",
+   detail:"Resmi kısa kod ✓ · Sadece doğrulama kodu ✓ · 'Kimseyle paylaşmayın' uyarısı ✓",
+   hint:"Gerçek banka SMS'leri genellikle ne içerir?",
+   isScam:false,emoji:"✅",
+   explain:"Gerçek bir 3D Secure SMS'i. ANCAK: Eğer bu işlemi sen başlatmadıysan kart bilgilerin çalınmış demektir. Kodu kimseyle paylaşma ve hemen bankanı ara."},
+
+  /* ── SES KLONLAMA & AI ── */
+  {diff:"uzman",type:"TELEFON — AI Ses Klonlama",avatar:"🎙️",from:"Babası (kayıtlı numara)",fromDetail:"+90 532 *** ** 44 — Ses babanıza birebir benziyor",
+   body:"\"Oğlum, trafik kazası geçirdim, hastanedeyim. Telefonu arkadaşıma verdim. 5.000 TL lazım acil, şu IBAN'a at: TR12 3456 7890... Sormadan gönder, çok yorgunum.\"",
+   detail:"Ses gerçek babanıza birebir benziyor · Numara kayıtlı görünüyor · Duygusal baskı yüksek",
+   hint:"AI ses klonlama 2025'te 3 saniyelik sesle çalışır. Para göndermeden farklı kanaldan mutlaka teyit et.",
+   isScam:true,emoji:"🎣",
+   explain:"AI ses klonlama dolandırıcılığı — ElevenLabs gibi araçlarla 3 saniyelik ses yeterli. Tanıdık ses + aciliyet + 'sormadan gönder' = bilinçli manipülasyon formülü. Para göndermeden o kişiyi bildiği bir soruyla sına. [TCK 142/2-e: Bilişim ile dolandırıcılık → 5-10 yıl hapis]"},
+
+  {diff:"uzman",type:"DEEPFAKE VİDEO",avatar:"🎭",from:"YouTube — Ünlü Yatırımcı Kanalı",fromDetail:"Kanal: 2.1M abone · Doğrulanmış ✓ · Son 2 saatte yüklendi",
+   body:"Tanınmış bir iş insanının videosu:\n\"Bu kripto platformuna 500.000 dolar yatırdım. %200 garanti getiri var. Bugün kayıt olursanız çift bonus, yarın kampanya bitiyor!\"",
+   detail:"Video yüz hareketleri hafif mekanik · Dudak senkronizasyonu %2 gecikmeli · Aciliyet vurgusu",
+   hint:"2025'te deepfake teknolojisi çok gelişti. Gerçek iş insanları sosyal medyada 'garanti getiri' vaat etmez.",
+   isScam:true,emoji:"🎣",
+   explain:"Deepfake video dolandırıcılığı — 2025'te dünya genelinde en hızlı büyüyen siber suç türü. Tanınmış yüzler AI ile sahte yatırım reklamlarına yerleştiriliyor. 'Garanti getiri' hiçbir zaman gerçek değildir."},
+
+  {diff:"uzman",type:"AI SOHBET BOTU",avatar:"🤖",from:"ChatGPT Destek",fromDetail:"chatgpt-support.help · SSL Sertifikası: ✓ (Kilit var)",
+   body:"ChatGPT Plus aboneliğiniz ödeme hatası nedeniyle askıya alındı.\n\nHesabınızı aktif tutmak için kart bilgilerinizi güncelleyin:\nchatgpt-support.help/update-billing",
+   detail:"Gerçek OpenAI adresi: openai.com — 'chatgpt-support.help' sahte domain · SSL ≠ güvenli",
+   hint:"OpenAI'nin resmi sitesi openai.com'dur. SSL kilidi siteyi güvenilir yapmaz.",
+   isScam:true,emoji:"🎣",
+   explain:"SSL sertifikası sadece bağlantının şifreli olduğunu gösterir — sitenin güvenilir olduğunu değil. Sahte siteler de kolayca SSL alabilir. Gerçek OpenAI bildirimleri yalnızca @openai.com uzantılı adreslerden gelir."},
+
+  {diff:"uzman",type:"AI ÜRETİMİ GÖRSEL",avatar:"🖼️",from:"Twitter/X — 52K beğeni",fromDetail:"@HaberciTR · 52K beğeni · 18K RT · Tüm Türkiye'de trend",
+   body:"Skandal fotoğraf: Tanınmış bir siyasetçi yolsuzluk toplantısında görüntülendi. Fotoğraf çok gerçekçi ve yüksek çözünürlüklü.",
+   detail:"Fotoğraftaki ellerde 6 parmak · Arka plan mimarisi tutarsız · Işık kaynakları çelişiyor",
+   hint:"2025'te AI görsellerinde eller, dişler ve arka plan detayları hatalı olur. Ters arama yap.",
+   isScam:true,emoji:"🎣",
+   explain:"AI üretimi görsel (2025 teknolojisi). İpuçları: anormal parmak sayısı, çelişen ışık kaynakları, arka plan tutarsızlıkları. Google Görseller veya TinEye ile ters arama yap. Kaynağı bulamazsan paylaşma."},
+
+  {diff:"zor",type:"AI ÜRETİMİ HABER",avatar:"📰",from:"SonDakika-TR.com",fromDetail:"sondakika-tr.com · Bugün 09:14",
+   body:"AFET ALARMI: Türkiye'de 7.4 büyüklüğünde deprem bekleniyor! Meteoroloji Müdürlüğü: 'Tüm vatandaşlar zemin kattan çıksın.' [ACİL PAYLAŞ]",
+   detail:"Meteoroloji deprem tahmin etmez — AFAD ve Kandilli yapar · 'ACİL PAYLAŞ' = panik taktiği",
+   hint:"Deprem tahmini hangi kurum yapar? Meteoroloji mi AFAD mı?",
+   isScam:true,emoji:"🎣",
+   explain:"AI üretimi afet dezenformasyonu. Deprem tahmini yapan kurum Meteoroloji değil, AFAD ve Kandilli Rasathanesi'dir. Afet haberlerini yalnızca afad.gov.tr'den takip et. Panik yaratmak için tasarlanmış içerikler en hızlı yayılan içeriklerdir."},
+
+  /* ── SİBER ZORBALIK SENARYOLARI ── */
+  {diff:"zor",type:"Grup Mesajı — WhatsApp",avatar:"💬",from:"Sınıf grubu (37 kişi)",fromDetail:"WhatsApp · Sınıf grubu · Tüm sınıf görebiliyor",
+   body:"[Bir arkadaşının fotoğrafını paylaşan mesaj]\n\"Hahaha bak nasıl görünüyor 😂😂 RT ediyoruz herkese\"\n\nGrup üyeleri 'haha' emojisi atıyor, kimse itiraz etmiyor.",
+   detail:"Paylaşılan fotoğraf kişinin rızası alınmadan gruba atıldı · Alay amaçlı",
+   hint:"Bu paylaşım TCK'da suç tanımına giriyor. 'Herkes yapıyor' geçerli mazeret değil.",
+   isScam:true,emoji:"🛑",
+   explain:"Bu siber zorbalıktır ve Türk Ceza Kanunu 134-135. maddeleri kapsamında suç teşkil eder. 'Herkes yapıyor' veya 'şaka' mazereti hukuki sorumluluğu ortadan kaldırmaz. Sessiz kalmak da zorbalığı sürdürür — itiraz et veya yetkililere bildir. [TCK 134-135: Özel hayatın gizliliği ihlali / Kişisel veri kaydı → 1-3 yıl hapis]"},
+
+  {diff:"zor",type:"Instagram DM",avatar:"👤",from:"anonim.hesap.2025",fromDetail:"@anonim.hesap.2025 · 0 takipçi · 0 takip · Bugün açıldı",
+   body:"Sana her gün mesaj atacağım. Nerede oturduğunu biliyorum. Arkadaşlarına senin hakkında her şeyi anlatacağım. Beni engellersen daha kötü olur.",
+   detail:"Yeni açılmış anonim hesap · Tehdit içeriyor · Konum bilgisi iddiası",
+   hint:"Bu mesajı sakın cevaplama. Ekran görüntüsü al, engelle ve güvendiğin bir yetişkine göster.",
+   isScam:true,emoji:"🛑",
+   explain:"Bu siber taciz ve tehdit suçudur (TCK 123–125). Cevap verme — bu kişiyi cesaretlendirir. Ekran görüntüsü al, hesabı ihbar et, engelle ve güvendiğin bir yetişkine veya okul rehberlik servisine bildir. Gerekirse 155 Polis İmdat'ı ara. [TCK 106: Tehdit → 6 ay-2 yıl hapis]"},
+
+  {diff:"uzman",type:"WhatsApp",avatar:"💬",from:"Ablası (kayıtlı numara)",fromDetail:"+90 532 *** ** 12 — Kayıtlı: Abla Zeynep",
+   body:"Kardeşim merhaba 🙂 Bankacılık uygulamasına giremiyorum, telefon değiştirdim. Hesabımı doğrulayabilmem için sana gelen doğrulama kodunu iletir misin?",
+   detail:"Tanıdık numara ve isim · Doğal, aceleci değil · Sadece 'kod' istiyor",
+   hint:"Kimse senden kendi hesabı için sana gelen SMS kodunu istemez. Bu senden kod istiyor!",
+   isScam:true,emoji:"🎣",
+   explain:"SIM swap / hesap ele geçirme saldırısı. Sana gelen kod senin hesabını açar — ablanın değil. Bu sosyal mühendislik saldırılarının en yaygın biçimidir. Hemen ablana bildiği bir şeyi sorarak sesli teyit et. [TCK 243: Bilişim sistemine girme → 1 yıla kadar hapis]"},
+
+  {diff:"zor",type:"EKRAN GÖRÜNTÜSÜ",avatar:"📸",from:"Sınıf WhatsApp grubu",fromDetail:"'Kanıt' olarak paylaşılıyor · Kaynak bilinmiyor",
+   body:"\"Bakın öğretmenimiz sınav sorularını sattığını itiraf ediyor!\" şeklinde bir mesajla birlikte bir ekran görüntüsü — öğretmenin fotoğrafı ve ismi ile.",
+   detail:"Ekran görüntüleri kolayca düzenlenebilir · Orijinal mesaj kaynağı yok · Kimse doğrulamıyor",
+   hint:"Ekran görüntüsü tek başına delil değildir. 5 dakikada sahte yapılabilir.",
+   isScam:true,emoji:"🎣",
+   explain:"Ekran görüntüleri herhangi bir metin düzenleme aracıyla sahte yapılabilir. Bu tür içerikleri doğrulamadan paylaşmak hem hukuki sorumluluk doğurur hem de bir kişinin hayatını mahvedebilir. Gerçek olduğunu düşünüyorsan okul yönetimine bildir. [TCK 125: İftira → 1-4 yıl hapis]"},
+
+  /* ── KARMAŞIK GERÇEK + SAHTE KARIŞIMI ── */
+  {diff:"uzman",type:"SMS",avatar:"📱",from:"Ziraat Bankası",fromDetail:"Gönderen: +90 212 634 18 00",
+   body:"Hesabınızdan 4.250 TL EFT yapıldı. İşlemi siz yapmadıysanız kartınızı durdurmak için: https://ziraat.com.tr/kartdurdur?ref=8472",
+   detail:"Numara gerçek bir İstanbul hattı · Alan adı doğru görünüyor ama parametre şüpheli",
+   hint:"Gerçek banka acil mesajları link içermez. Numara çubuğuna doğrudan yaz.",
+   isScam:true,emoji:"🎣",
+   explain:"Homograph saldırısı — ziraat.com.tr gerçek görünse de URL'deki '?ref=8472' parametresi ve SMS'in link içermesi şüphe işareti. Gerçek bankalar acil durumlarda link göndermez; uygulamanı veya 444 0 444'ü kullan."},
+
+  {diff:"uzman",type:"E-POSTA",avatar:"📧",from:"no-reply@apple.com",fromDetail:"Gönderen: no-reply@apple.com · SPF ✓ · DKIM ✓",
+   body:"Birisi Apple Kimliğinizle Windows bilgisayardan oturum açmayı denedi.\nKonum: Moskova, Rusya\nTarih: Bugün 03:42\n\nBu siz değilseniz Apple Kimliğinizi hemen güvenceye alın.",
+   detail:"apple.com adresi gerçek ✓ · E-posta imzası doğrulanmış ✓ · Şüpheli konum gerçek tehdit olabilir",
+   hint:"Alan adı gerçek, imzalar doğrulanmış. Senden ne istiyor?",
+   isScam:false,emoji:"✅",
+   explain:"Gerçek bir Apple güvenlik bildirimi. Alan adı, SPF ve DKIM imzaları doğrulanmış. ANCAK dikkat: Linke tıklamak yerine tarayıcına appleid.apple.com yaz ve oradan giriş yap — phishing sayfaları Apple'ı bire bir taklit edebiliyor."},
+
+  {diff:"orta",type:"UYGULAMA BİLDİRİMİ",avatar:"🏦",from:"Ziraat Bankası Uygulaması",fromDetail:"Sistem bildirimi — Uygulama içi",
+   body:"Hesabınıza 2.340,00 TL para transferi yapılmıştır.\nGönderen: AHMET YILMAZ\nTarih: 15.02.2025 14:32\nİşlem No: ZRT-20250215-4829",
+   detail:"Uygulama içi bildirim ✓ · Para geliyor (gitmiyor) ✓ · Senden bir şey istemiyor ✓",
+   hint:"Bu bildirim senden bir şey istiyor mu?",
+   isScam:false,emoji:"✅",
+   explain:"Gerçek bir para giriş bildirimi. Uygulama içinden gelmiş, senden hiçbir şey talep etmiyor. Şüpheleniyorsan uygulamayı yeniden aç ve hesap hareketlerini kendin kontrol et."},
+
+  {diff:"uzman",type:"SMS",avatar:"📱",from:"Bilinmeyen +1 numara",fromDetail:"+1 (555) 847-2910 — ABD numarası",
+   body:"Hi! I'm Emma from Meta Business Support. Your Facebook Business account has been suspended due to policy violations. Reply YES to verify your identity and restore access.",
+   detail:"İngilizce mesaj · ABD numarası · 'Reply YES' ile doğrulama isteği · Aciliyet",
+   hint:"Meta hiçbir zaman SMS ile 'YES' yazmanı istemez. İngilizce gelmesi de şüpheli.",
+   isScam:true,emoji:"🎣",
+   explain:"Meta, Facebook veya Instagram hesap sorunları için SMS göndermez. 'Reply YES' tuzağı: onay mesajı gönderince hesap bilgilerin paylaşılıyor veya ücretli servise abone oluyorsun. Resmi bildirimler yalnızca uygulama içi ve mail yoluyla gelir."},
+
+  {diff:"uzman",type:"DM — Discord",avatar:"🎮",from:"NitroGift_Bot",fromDetail:"NitroGift_Bot · Bot rozetli · Sunucuda 1.234 üye",
+   body:"🎉 Tebrikler! Oyun sunucumuzun 100K üye kutlamasında 3 aylık Discord Nitro kazandınız!\n\nAlmak için: discord-nitro-gift.com/claim?code=XK7T2\n\n⏰ Bu bağlantı 10 dakika geçerli!",
+   detail:"discord-nitro-gift.com — resmi Discord adresi discord.com'dur · Sahte aciliyet · Bot rozeti sahte yapılabilir",
+   hint:"Discord hediyeleri her zaman discord.com/gifts adresinden gelir. Başka domain = tuzak.",
+   isScam:true,emoji:"🎣",
+   explain:"Discord Nitro dolandırıcılığı — en yaygın oyun topluluğu tuzaklarından biri. Resmi Discord hediyeleri yalnızca discord.com/gifts üzerinden verilir. Sahte sitelere girişte token çalınır ve hesabın ele geçirilir. '10 dakika' baskısı yapay aciliyettir."},
+
+  {diff:"uzman",type:"QR KOD",avatar:"📷",from:"AVM Anket Standı",fromDetail:"Büyük bir AVM içinde stand · 'Ücretsiz alışveriş çeki kazan'",
+   body:"[Stand görevlisi QR kodu okutmanı istiyor]\n\"Sadece WhatsApp'ı açın, bu kodu okutun. 250 TL alışveriş çeki anında telefonunuza gelecek.\"",
+   detail:"QR kod WhatsApp'ı açıyor · 'wa.me/+447...' formatında yabancı numara · Stand resmî görünümlü",
+   hint:"WhatsApp QR kodu = bağlantı isteği veya mesaj gönderme. Numaraya dikkat et.",
+   isScam:true,emoji:"🎣",
+   explain:"QR kod phishing — fiziksel ortamlarda giderek yaygınlaşıyor. WhatsApp QR kodu okuttuğunda yabancı bir numaraya mesaj göndermiş oluyorsun ve telefon numaran ifşa oluyor. 'Ücretsiz çek' karşılığında kişisel verin toplanıyor veya dolandırıcılık zinciri başlatılıyor."},
+
+  {diff:"uzman",type:"AI DESTEKLİ MESAJLAŞMA",avatar:"💕",from:"yeni_arkadasin_2025",fromDetail:"@yeni_arkadasin_2025 · 2 hafta önce tanıştınız · Çok iyi anlaşıyorsunuz",
+   body:"Merhaba 🙂 Sana bir şey söylemem lazım, biraz utanıyorum... Annem hastanede, çok acil para lazım. 500 TL yollasan ödeyebilirim. Sana güveniyorum, başka birine söyleyemem.",
+   detail:"2 haftada çok derin yakınlık · Duygusal bağ kuruldu · Utanç + aciliyet kombinasyonu",
+   hint:"'Hızlı yakınlaşma + ilk para talebi' kombinasyonu AI destekli romance scam'in imzasıdır.",
+   isScam:true,emoji:"🎣",
+   explain:"Romance scam — AI sohbet botları artık aylarca gerçekmiş gibi ilişki sürdürebiliyor. Tanışma → güven inşası → 'acil para' klasik formüldür. Hiçbir zaman tanımadığın birine çevrimiçi para gönderme, ne kadar 'yakın' hissettirirse hissettirsin."},
+
+  {diff:"uzman",type:"POP-UP BİLDİRİMİ",avatar:"⚠️",from:"Windows Güvenlik Uyarısı",fromDetail:"Ekran bildirimi · Kırmızı uyarı · Acil eylem gerekli",
+   body:"⚠️ VİRÜS TESPİT EDİLDİ!\n\nBilgisayarınızda 5 adet tehlikeli virüs bulundu. Tüm dosyalarınız risk altında!\n\nHEMEN ARAYIN: 0850 XXX XX XX\nMicrosoft Teknik Destek - 7/24 Hizmet",
+   detail:"Sahte Windows pop-up · Telefon numarası veriyor · Panik yaratmaya çalışıyor",
+   hint:"Microsoft asla pop-up ile telefon numarası vermez. Gerçek uyarılar Windows Defender'dan gelir.",
+   isScam:true,emoji:"🎣",
+   explain:"Sahte teknik destek dolandırıcılığı. Microsoft veya herhangi bir teknoloji şirketi pop-up ile telefon numarası vermez. Bu numarayı ararsanız 'uzaktan erişim' isteyip bilgisayarınızı ele geçirmeye veya kredi kartı bilgisi istemeye çalışırlar. [TCK 142/2-e: Bilişim ile dolandırıcılık → 5-10 yıl hapis]"},
+
+  {diff:"uzman",type:"E-POSTA — Okul",avatar:"🏫",from:"mudur@fatihortaokulu-egitim.com",fromDetail:"mudur@fatihortaokulu-egitim.com · Konu: ACİL",
+   body:"Sayın velimiz,\nÇocuğunuz bugün okulda ciddi bir disiplin olayına karıştı. Konuyu hassasiyetle ele almak için e-okul şifrenizi aşağıdaki forma girmenizi rica ediyoruz:\nforms.gle/xK7abc...",
+   detail:"Alan adı: -egitim.com (Resmi okul adresi .meb.k12.tr ile biter) · Google Form ile şifre isteniyor",
+   hint:"MEB okullarının resmi e-posta adresleri .meb.k12.tr ile biter. Google Form ile şifre istenmez.",
+   isScam:true,emoji:"🎣",
+   explain:"Okul kimliğini taklit eden phishing — özellikle velileri hedef alıyor. MEB'e bağlı okulların resmi adresleri [okul].meb.k12.tr formatındadır. Hiçbir resmi kurum Google Form ile şifre istemez. Müdürü doğrudan telefon ile ara."},
+
+  {diff:"uzman",type:"WhatsApp Grubu",avatar:"🎓",from:"Mezun Öğrenciler Grubu",fromDetail:"156 üye · Güvenilir grup ortamı · Mezuniyet duygusu",
+   body:"Arkadaşlar hepinize duyuru! Okulumuzun 50. yılı için büyük bağış kampanyası başlattık 🎉\n\nOkul hesabı: TR88 0006 4000 0011 1234 5678\n\nAz kaldı hedefe, hadi destek olalım! 🙏",
+   detail:"Büyük güvenilir grup · Duygusal bağ (mezuniyet) · IBAN direkt verilmiş · Kim gönderdi?",
+   hint:"IBAN'ın kime ait olduğunu doğrulamadan para gönderme. Bu hesap gerçekten okula mı ait?",
+   isScam:true,emoji:"🎣",
+   explain:"Sosyal mühendislik + güven ortamı istismarı. Büyük gruplarda 'yetkili' gibi görünen biri kolayca sahte kampanya açabilir. IBAN'ın gerçekten okula ait olduğunu doğrulamadan asla para gönderme. Okul idaresini doğrudan telefon ile ara."},
+
+  {diff:"uzman",type:"TikTok Yorumu",avatar:"🎵",from:"@gercek.bilgi.tr",fromDetail:"@gercek.bilgi.tr · 890K takipçi · Doğrulanmış görünümlü",
+   body:"CANLI YAYINIMIZDA söylediğimi burada da tekrarlıyorum: Bu uygulamayı indirin, günde 2 saat oynayın, günlük 500 TL kazanın. Reklam değil, ben de kullanıyorum. Link bio'da!",
+   detail:"890K takipçi · 'Ben de kullanıyorum' sosyal kanıt · Bio linki dışarıya yönlendiriyor",
+   hint:"'Günde 2 saat ile 500 TL kazan' — hiçbir uygulama böyle çalışmaz. Ne kazanıyorlar ki sana versinler?",
+   isScam:true,emoji:"🎣",
+   explain:"Sahte kazanç uygulamaları — TikTok ve Instagram'da en yaygın genç dolandırıcılığı. Asıl iş modeli: verilerini toplar, reklam izletir, sonra ödeme yapmaz veya cihazına kötü amaçlı yazılım yükler. Rozet satın alınabilir. 'Ben de kullanıyorum' sosyal kanıt manipülasyonudur."},
+];
+
+/* ══════════════════════
+   GAME OVERLAY FUNCTIONS
+══════════════════════ */
+function startGame(){
+  $('game-slide').classList.add('visible');
+  pauseProg(); // pause carousel
+}
+function closeGame(){
+  $('game-slide').classList.remove('visible');
+  goEntry(); // reset game to entry screen
+  resetProg(); // resume carousel
+}
+
+/* ══════════════════════
+   GAME ENGINE
+══════════════════════ */
+const Q_COUNT=12;
+let gQ=[],gIdx=0,gCorrect=0,gWrong=0,gHints=0;
+let gAnswered=false;
+
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+function $(i){return document.getElementById(i);}
+
+function showScreen(id){
+  ['screen-entry','screen-game','screen-results'].forEach(s=>{
+    $(s).style.display=s===id?(s==='screen-results'?'flex':'flex'):'none';
+  });
+}
+
+function goEntry(){showScreen('screen-entry');}
+
+function entryStart(){
+  gQ=shuffle(SC).slice(0,Q_COUNT);
+  gIdx=0;gCorrect=0;gWrong=0;gHints=0;gAnswered=false;
+  $('sc-correct').textContent=0;$('sc-wrong').textContent=0;
+  showScreen('screen-game');
+  buildPips();showQ();
+}
+
+function buildPips(){
+  const el=$('game-pips');el.innerHTML='';
+  gQ.forEach((_,i)=>{
+    const p=document.createElement('div');
+    p.className='pip'+(i===0?' current':'');p.id='pip-'+i;el.appendChild(p);
+  });
+}
+function updatePip(i,ok){
+  const p=$('pip-'+i);if(!p)return;
+  p.classList.remove('current');p.classList.add(ok?'done-correct':'done-wrong');
+  const n=$('pip-'+(i+1));if(n)n.classList.add('current');
+}
+
+
+function showQ(){
+  gAnswered=false;const q=gQ[gIdx];
+  const dm={kolay:{c:'var(--green)',t:'KOLAY'},orta:{c:'var(--gold)',t:'ORTA'},zor:{c:'var(--red)',t:'ZOR'},uzman:{c:'var(--purple)',t:'UZMAN'}};
+  const d=dm[q.diff]||dm.zor;
+  const db=$('diff-badge');
+  db.textContent=d.t;db.style.color=d.c;db.style.border='1px solid '+d.c;db.style.background='rgba(255,255,255,.04)';
+  $('msg-type-badge').textContent=q.type;
+  $('msg-avatar').textContent=q.avatar;
+  $('msg-from').innerHTML='<strong>'+q.from+'</strong><br>'+q.fromDetail;
+  $('msg-body').textContent=q.body;
+  $('msg-detail').textContent=q.detail;
+  $('hint-text').style.display='none';$('hint-btn').disabled=false;
+  $('answer-btns').style.opacity='1';$('answer-btns').style.pointerEvents='auto';
+}
+
+function showHint(){
+  $('hint-text').textContent='💡 '+gQ[gIdx].hint;
+  $('hint-text').style.display='block';
+  $('hint-btn').disabled=true;gHints++;
+}
+
+function answer(isScam){
+  if(gAnswered)return;
+  gAnswered=true;
+  const q=gQ[gIdx];const ok=(isScam===q.isScam);
+  if(ok){gCorrect++;$('sc-correct').textContent=gCorrect;}
+  else{gWrong++;$('sc-wrong').textContent=gWrong;
+    $('msg-card').classList.add('shake');setTimeout(()=>$('msg-card').classList.remove('shake'),450);}
+  updatePip(gIdx,ok);
+  const v=ok
+    ?(q.isScam?'🎉 Tuzağı Gördün!':'🎉 Doğru — Gerçekti!')
+    :(q.isScam?'😬 Kandırıldın!':'😬 Yanlış — Aslında Güvenliydi.');
+  openFeedback(q.emoji,v,ok?'var(--green)':'var(--red)',q.explain,ok?'correct':'wrong');
+}
+
+function openFeedback(emoji,verdict,color,explain,kind){
+  $('fb-emoji').textContent=emoji;
+  $('fb-verdict').textContent=verdict;
+  $('fb-verdict').style.color=color;
+  $('fb-explain').textContent=explain;
+  $('fb-next').style.background=color;
+  $('fb-next').style.color=(kind==='correct')?'#07090f':'#fff';
+  $('fb-next').style.boxShadow='0 4px 20px '+color.replace(')',', .4)').replace('var(','rgba(').replace('--green','6,214,160').replace('--red','255,75,110').replace('--gold','255,209,102');
+  $('feedback-box').className=kind==='correct'?'correct':kind==='timeout'?'timeout':'wrong';
+  // force reflow so transition fires
+  void $('feedback-overlay').offsetHeight;
+  $('feedback-overlay').classList.add('show');
+  $('answer-btns').style.opacity='.25';$('answer-btns').style.pointerEvents='none';
+}
+
+$('fb-next').addEventListener('click',()=>{
+  $('feedback-overlay').classList.remove('show');
+  gIdx++;
+  // küçük gecikme — kapanma animasyonu bitmeden soru değişmesin
+  setTimeout(()=>{ if(gIdx>=gQ.length)endGame();else showQ(); }, 240);
+});
+
+function endGame(){
+  const finalScore=Math.max(0,gCorrect-gHints);
+  const pct=Math.round((finalScore/Q_COUNT)*100);
+  let emoji,title,msg,color;
+  if(pct===100){emoji='🏆';color='var(--gold)';title='TAM PUAN! Efsanesin.';msg='Hiç kandırılmadın, ipucu da kullanmadın. Dijital dünyada seni geçmek çok zor!';}
+  else if(pct>=80){emoji='💪';color='var(--green)';title='Harika! Neredeyse mükemmel.';msg='Sadece 1–2 ince tuzak seni atlattı. Dijital güvenlik konusunda çok iyi durumdasın.';}
+  else if(pct>=60){emoji='🤔';color='var(--cyan)';title='İyi, ama geliştirebilirsin.';msg='Bazı AI ve sosyal mühendislik tuzakları seni atlattı. Slaytları tekrar oku ve tekrar dene!';}
+  else if(pct>=40){emoji='😬';color='var(--gold)';title='Dikkat! Birçok tuzağa düştün.';msg='Özellikle AI tuzakları ve ses klonlama senaryoları zor geldi. Bilgi sayfalarını incele.';}
+  else{emoji='🆘';color='var(--red)';title='Tehlike! Dolandırıcılara açık.';msg='Paniğe kapılma — bu bilgileri öğrenmek seni koruyacak. Baştan başla!';}
+
+  showScreen('screen-results');
+  $('res-grade').textContent=emoji;
+  $('res-score-big').textContent=finalScore+' / '+Q_COUNT;
+  $('res-score-big').style.color=color;
+  $('res-title').textContent=title;
+  $('res-msg').textContent=msg;
+  $('res-pills').innerHTML=`
+    <div class="rb-pill" style="background:rgba(6,214,160,.1);color:var(--green);border:1px solid rgba(6,214,160,.2)">${gCorrect} doğru</div>
+    <div class="rb-pill" style="background:rgba(255,75,110,.1);color:var(--red);border:1px solid rgba(255,75,110,.2)">${gWrong} yanlış</div>
+    ${gHints>0?`<div class="rb-pill" style="background:rgba(255,209,102,.08);color:var(--gold);border:1px solid rgba(255,209,102,.18)">${gHints} ipucu (–${gHints})</div>`:''}
+    <div class="rb-pill" style="background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--border)">${Q_COUNT} soru</div>`;
+}
+
+/* ══════════════════════
+   CAROUSEL
+══════════════════════ */
+const DUR=10000,T=80;
+const slides=document.querySelectorAll('.slide');
+const dotsEl=$('dots'),progEl=$('progress'),clockEl=$('clock');
+const N=slides.length;
+let cur=0,elapsed=0,carIv=null;
+for(let i=0;i<N;i++){
+  const d=document.createElement('div');d.className='dot'+(i===0?' on':'');
+  d.addEventListener('click',()=>go(i));dotsEl.appendChild(d);
+}
+const dots=document.querySelectorAll('.dot');
+function showSlide(idx){
+  slides.forEach((s,i)=>s.classList.toggle('visible',i===idx));
+  dots.forEach((d,i)=>d.classList.toggle('on',i===idx));
+  if(slides[idx])slides[idx].scrollTop=0;
+  resetProg(); // always reset progress, no special case for last slide
+}
+function go(idx){cur=((idx%N)+N)%N;showSlide(cur);}
+function next(){go(cur+1);}
+function pauseProg(){clearInterval(carIv);progEl.style.width='0%';}
+function resetProg(){
+  elapsed=0;progEl.style.width='0%';clearInterval(carIv);
+  carIv=setInterval(()=>{elapsed+=T;progEl.style.width=Math.min((elapsed/DUR)*100,100)+'%';if(elapsed>=DUR)next();},T);
+}
+function tick(){const n=new Date();clockEl.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
+tick();setInterval(tick,5000);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')next();if(e.key==='ArrowLeft')go(cur-1);});
+$('nav-next').addEventListener('click',next);
+$('nav-prev').addEventListener('click',()=>go(cur-1));
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
+document.addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50){d<0?next():go(cur-1);}});
+showSlide(0);resetProg();
+</script>
+</body>
+</html>
